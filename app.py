@@ -82,3 +82,4 @@ st.divider()
 st.subheader("Turnover breakdown")
 st.write(f"• Core croissant turnover / year: **€{annual_turnover_core:,.0f}**")
 st.write(f"• Extra SKU turnover / year: **€{annual_extra_turnover:,.0f}**")
+
