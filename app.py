@@ -80,3 +80,4 @@ if total_capex > 0:
     st.metric("ROI (%)", f"{roi:.1f}%")
 else:
     st.info("ROI not available (CAPEX = 0)")
+
