@@ -12,8 +12,12 @@ st.sidebar.header("🟧 CAPEX (Initial investment)")
 
 def capex_line(label, default_price, default_qty):
     col1, col2 = st.sidebar.columns(2)
-    price = col1.number_input(f"{label} – unit price (€)", 0.0, 10000.0, default_price, 10.0)
-    qty = col2.number_input(f"{label} – qty", 0, 10, default_qty)
+    price = col1.number_input(
+        f"{label} – unit price (€)", 0.0, 10000.0, default_price, 10.0
+    )
+    qty = col2.number_input(
+        f"{label} – qty", 0, 10, default_qty
+    )
     return price * qty
 
 injector = capex_line("Injector", 798.0, 3)
@@ -28,8 +32,12 @@ total_equipment = injector + base + waffle + transport
 # ======================
 st.sidebar.header("🟩 Sales")
 
-price_with_vat = st.sidebar.number_input("Selling price WITH VAT (€)", 0.0, 20.0, 3.90, 0.05)
-vat_rate = st.sidebar.number_input("VAT (%)", 0.0, 30.0, 5.5, 0.1)
+price_with_vat = st.sidebar.number_input(
+    "Selling price WITH VAT (€)", 0.0, 20.0, 3.90, 0.05
+)
+vat_rate = st.sidebar.number_input(
+    "VAT (%)", 0.0, 30.0, 5.5, 0.1
+)
 
 price_ex_vat = price_with_vat / (1 + vat_rate / 100)
 
@@ -38,8 +46,17 @@ price_ex_vat = price_with_vat / (1 + vat_rate / 100)
 # ======================
 st.sidebar.header("🟩 Operations")
 
-days_per_year = st.sidebar.number_input("Number of days in operation / year", 1, 365, 320)
-croissants_per_day = st.sidebar.number_input("Actual croissant sales quantity / day", 0, 5000, 50)
+days_per_year = st.sidebar.number_input(
+    "Number of days in operation / year", 1, 365, 322
+)
+
+croissants_per_day = st.sidebar.number_input(
+    "Actual croissant sales quantity / day", 0, 5000, 50
+)
+
+product_margin_pct = st.sidebar.number_input(
+    "Product margin (%)", 0.0, 100.0, 65.0, 1.0
+)
 
 # ======================
 # 🟩 EXTRA TURNOVER (ASSUMPTION – FEUIL 2)
@@ -49,24 +66,29 @@ extra_turnover_day = st.sidebar.number_input(
 )
 
 # ======================
-# 🔒 CALCULATIONS (STRICT FEUIL 2)
+# 🔒 CALCULATIONS (STRICT FEUIL 2 LOGIC)
 # ======================
+
+# Core turnover
 daily_core_turnover = croissants_per_day * price_ex_vat
 annual_core_turnover = daily_core_turnover * days_per_year
 
+# Extra turnover
 annual_extra_turnover = extra_turnover_day * days_per_year
 
-total_annual_turnover = annual_core_turnover + annual_extra_turnover
+# Extra margin (used for ROI)
+annual_extra_margin = annual_extra_turnover * (product_margin_pct / 100)
 
+# ROI (month) — BASED ON MARGIN (NOT TURNOVER)
 roi_month = (
     total_equipment
-    / (total_annual_turnover / 12)
-    if total_annual_turnover > 0
+    / (annual_extra_margin / 12)
+    if annual_extra_margin > 0
     else 0
 )
 
 # ======================
-# 📊 RESULTS
+# 📊 RESULTS (DISPLAY ONLY)
 # ======================
 st.header("📊 Results of BAR À CROISSANT ROI")
 
@@ -78,5 +100,8 @@ col3.metric("ROI (months)", f"{roi_month:.2f}")
 
 st.divider()
 
-st.write(f"• Core turnover / year: **€{annual_core_turnover:,.0f}**")
+st.subheader("Calculated values (locked)")
+
 st.write(f"• Extra turnover / day (assumption): **€{extra_turnover_day:,.0f}**")
+st.write(f"• Extra margin / year (used for ROI): **€{annual_extra_margin:,.0f}**")
+st.write(f"• Core turnover / year: **€{annual_core_turnover:,.0f}**")
