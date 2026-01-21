@@ -60,7 +60,7 @@ total_annual_turnover = annual_turnover_core + extra_turnover_year
 # ======================
 # RESULTS DISPLAY
 # ======================
-st.header("📊 Results (FEUIL 2)")
+st.header("📊 Results (Results of BAR À CROISSANT ROI)")
 
 col1, col2, col3 = st.columns(3)
 
@@ -80,4 +80,5 @@ if total_capex > 0:
     st.metric("ROI (%)", f"{roi:.1f}%")
 else:
     st.info("ROI not available (CAPEX = 0)")
+
 
