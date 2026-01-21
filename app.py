@@ -79,7 +79,23 @@ col3.metric("ROI (months)", f"{roi_month:.2f}")
 
 st.divider()
 
-st.subheader("Turnover breakdown")
+st.subheader("Turnover breakdown (calculated)")
+
+col_a, col_b = st.columns(2)
+
+col_a.metric(
+    "Extra turnover generated / day (€)",
+    f"{daily_extra_turnover:,.0f}"
+)
+
+col_b.metric(
+    "Extra turnover generated / year (€)",
+    f"{annual_extra_turnover:,.0f}"
+)
+
+st.divider()
+
 st.write(f"• Core croissant turnover / year: **€{annual_turnover_core:,.0f}**")
-st.write(f"• Extra SKU turnover / year: **€{annual_extra_turnover:,.0f}**")
+
+
 
