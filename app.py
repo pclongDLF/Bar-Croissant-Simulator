@@ -6,95 +6,104 @@ st.set_page_config(
 )
 
 st.title("🥐 BAR À CROISSANT – ROI Simulator")
-st.markdown("Results of **BAR À CROISSANT ROI**")
+st.markdown("Model rebuilt strictly from Excel (FEUIL 2)")
 
 # ==================================================
-# 🟧 CAPEX
+# 🟧 CAPEX — INPUTS
 # ==================================================
-st.sidebar.header("🟧 CAPEX (Initial investment)")
+st.sidebar.header("🟧 CAPEX")
 
-def capex_line(label, default_price, default_qty):
-    col1, col2 = st.sidebar.columns(2)
-    unit_price = col1.number_input(
-        f"{label} – unit price (€)",
-        min_value=0.0,
-        max_value=10000.0,
-        value=default_price,
-        step=1.0
+def capex_input(label, unit_default, qty_default):
+    c1, c2 = st.sidebar.columns(2)
+    unit = c1.number_input(
+        f"{label} – unit price (€)", 0.0, 10000.0, unit_default, 1.0
     )
-    qty = col2.number_input(
-        f"{label} – qty",
-        min_value=0,
-        max_value=10,
-        value=default_qty,
-        step=1
+    qty = c2.number_input(
+        f"{label} – qty", 0, 20, qty_default, 1
     )
-    return unit_price * qty
+    return unit * qty
 
-injector = capex_line("Injector", 798.0, 3)
-base = capex_line("Base", 284.0, 1)
-waffle = capex_line("Waffle iron (croiffle + Eiffel Tower)", 1000.0, 1)
-transport = capex_line("Transport", 600.0, 1)
+injector = capex_input("Injector", 798.0, 3)
+base = capex_input("Base", 284.0, 1)
+waffle = capex_input("Waffle iron (croiffle + Eiffel Tower)", 1000.0, 1)
+transport = capex_input("Transport", 600.0, 1)
 
 total_equipment = injector + base + waffle + transport
 
-st.sidebar.markdown("### 🧾 CAPEX breakdown (calculated)")
-st.sidebar.write(f"Injector total: €{injector:,.0f}")
-st.sidebar.write(f"Base total: €{base:,.0f}")
-st.sidebar.write(f"Waffle iron total: €{waffle:,.0f}")
-st.sidebar.write(f"Transport total: €{transport:,.0f}")
-
 # ==================================================
-# 🟩 SALES
+# 🟩 SALES — INPUTS
 # ==================================================
 st.sidebar.header("🟩 Sales")
 
 price_with_vat = st.sidebar.number_input(
     "Selling price WITH VAT (€)", 0.0, 20.0, 3.90, 0.05
 )
-vat_rate = st.sidebar.number_input(
+
+vat_pct = st.sidebar.number_input(
     "VAT (%)", 0.0, 30.0, 5.5, 0.1
 )
 
-price_ex_vat = price_with_vat / (1 + vat_rate / 100)
-st.sidebar.markdown(f"**Selling price EX VAT:** €{price_ex_vat:.2f}")
+price_ex_vat = price_with_vat / (1 + vat_pct / 100)
 
 # ==================================================
-# 🟩 OPERATIONS
+# 🟩 OPERATIONS — INPUTS
 # ==================================================
 st.sidebar.header("🟩 Operations")
 
-days_per_year = st.sidebar.number_input(
-    "Number of days in operation / year",
-    min_value=320,
-    max_value=320,
-    value=320,
-    step=1
+days_year = st.sidebar.number_input(
+    "Number of days in operations / year", 1, 365, 320, 1
 )
 
-product_margin_pct = st.sidebar.number_input(
-    "Product margin (%)", 0.0, 100.0, 65.0, 1.0
+croissants_day = st.sidebar.number_input(
+    "Actual croissant sales quantity / day", 0, 5000, 50, 1
+)
+
+additional_pct = st.sidebar.number_input(
+    "Additional filled croissant sold (%)", 0.0, 100.0, 35.0, 1.0
+)
+
+extra_sku_day = st.sidebar.number_input(
+    "Number of extra SKU sales / day", 0, 5000, 18, 1
 )
 
 extra_turnover_day = st.sidebar.number_input(
-    "Extra turnover generated / day (€)",
-    0.0, 1000.0, 64.0, 1.0
+    "Extra turnover generated / day (€)", 0.0, 5000.0, 64.0, 1.0
+)
+
+margin_pct = st.sidebar.number_input(
+    "Product margin (%)", 0.0, 100.0, 65.0, 1.0
 )
 
 # ==================================================
-# 🔒 CALCULATIONS
+# 🔒 CALCULATIONS — STRICT
 # ==================================================
-extra_turnover_year = extra_turnover_day * days_per_year
-extra_margin_year = extra_turnover_year * (product_margin_pct / 100)
 
-roi_month = total_equipment / (extra_margin_year / 12)
+converted_filled_day = croissants_day * (additional_pct / 100)
+
+extra_turnover_year = extra_turnover_day * days_year
+
+extra_margin_year = extra_turnover_year * (margin_pct / 100)
+
+roi_month = (
+    total_equipment / (extra_margin_year / 12)
+    if extra_margin_year > 0
+    else 0
+)
 
 # ==================================================
 # 📊 RESULTS
 # ==================================================
 st.header("📊 Results of BAR À CROISSANT ROI")
 
-col1, col2, col3 = st.columns(3)
-col1.metric("Total equipment (€)", f"{total_equipment:,.0f}")
-col2.metric("Extra turnover / year (€)", f"{extra_turnover_year:,.0f}")
-col3.metric("ROI (months)", f"{roi_month:.2f}")
+c1, c2, c3 = st.columns(3)
+c1.metric("Total equipment (€)", f"{total_equipment:,.0f}")
+c2.metric("Extra turnover / year (€)", f"{extra_turnover_year:,.0f}")
+c3.metric("ROI (months)", f"{roi_month:.2f}")
+
+st.divider()
+
+st.subheader("Calculated values (locked)")
+
+st.write(f"• Selling price EX VAT: **€{price_ex_vat:.2f}**")
+st.write(f"• Converted filled croissant / day: **{converted_filled_day:.1f}**")
+st.write(f"• Extra margin / year: **€{extra_margin_year:,.0f}**")
