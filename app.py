@@ -47,11 +47,15 @@ price_ex_vat = price_with_vat / (1 + vat_rate / 100)
 st.sidebar.header("🟩 Operations")
 
 days_per_year = st.sidebar.number_input(
-    "Number of days in operation / year", 1, 365, 322
+    "Number of days in operation / year", 1, 365, 320
 )
 
 croissants_per_day = st.sidebar.number_input(
     "Actual croissant sales quantity / day", 0, 5000, 50
+)
+
+conversion_pct = st.sidebar.number_input(
+    "Conversion to filled croissant / croiffle (%)", 0.0, 100.0, 35.0, 1.0
 )
 
 product_margin_pct = st.sidebar.number_input(
@@ -59,27 +63,21 @@ product_margin_pct = st.sidebar.number_input(
 )
 
 # ======================
-# 🟩 EXTRA TURNOVER (ASSUMPTION – FEUIL 2)
-# ======================
-extra_turnover_day = st.sidebar.number_input(
-    "Extra turnover generated / day (€)", 0.0, 1000.0, 64.0, 1.0
-)
-
-# ======================
-# 🔒 CALCULATIONS (STRICT FEUIL 2 LOGIC)
+# 🔒 CALCULATIONS (STRICT FEUIL 2)
 # ======================
 
 # Core turnover
 daily_core_turnover = croissants_per_day * price_ex_vat
 annual_core_turnover = daily_core_turnover * days_per_year
 
-# Extra turnover
-annual_extra_turnover = extra_turnover_day * days_per_year
+# Extra turnover (from conversion)
+daily_extra_turnover = daily_core_turnover * (conversion_pct / 100)
+annual_extra_turnover = daily_extra_turnover * days_per_year
 
 # Extra margin (used for ROI)
 annual_extra_margin = annual_extra_turnover * (product_margin_pct / 100)
 
-# ROI (month) — BASED ON MARGIN (NOT TURNOVER)
+# ROI (month) — FEUIL 2 logic
 roi_month = (
     total_equipment
     / (annual_extra_margin / 12)
@@ -88,7 +86,7 @@ roi_month = (
 )
 
 # ======================
-# 📊 RESULTS (DISPLAY ONLY)
+# 📊 RESULTS
 # ======================
 st.header("📊 Results of BAR À CROISSANT ROI")
 
@@ -102,6 +100,6 @@ st.divider()
 
 st.subheader("Calculated values (locked)")
 
-st.write(f"• Extra turnover / day (assumption): **€{extra_turnover_day:,.0f}**")
+st.write(f"• Extra turnover / day: **€{daily_extra_turnover:,.0f}**")
 st.write(f"• Extra margin / year (used for ROI): **€{annual_extra_margin:,.0f}**")
 st.write(f"• Core turnover / year: **€{annual_core_turnover:,.0f}**")
