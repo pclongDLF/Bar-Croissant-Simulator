@@ -9,7 +9,7 @@ st.title("🥐 BAR À CROISSANT – ROI Simulator")
 st.markdown("Results of **BAR À CROISSANT ROI**")
 
 # ==================================================
-# 🟧 CAPEX (VARIABLES)
+# 🟧 CAPEX (VARIABLES – ORANGE)
 # ==================================================
 st.sidebar.header("🟧 CAPEX (Initial investment)")
 
@@ -38,6 +38,7 @@ transport = capex_line("Transport", 600.0, 1)
 
 total_equipment = injector + base + waffle + transport
 
+# CAPEX breakdown (calculated)
 st.sidebar.markdown("### 🧾 CAPEX breakdown (calculated)")
 st.sidebar.write(f"Injector total: €{injector:,.0f}")
 st.sidebar.write(f"Base total: €{base:,.0f}")
@@ -45,7 +46,7 @@ st.sidebar.write(f"Waffle iron total: €{waffle:,.0f}")
 st.sidebar.write(f"Transport total: €{transport:,.0f}")
 
 # ==================================================
-# 🟩 SALES (VARIABLES)
+# 🟩 SALES (VARIABLES – GREEN)
 # ==================================================
 st.sidebar.header("🟩 Sales")
 
@@ -67,14 +68,12 @@ vat_rate = st.sidebar.number_input(
 
 price_ex_vat = price_with_vat / (1 + vat_rate / 100)
 
-# ==================================================
-# 🔒 SALES – CALCULATED (VISIBLE)
-# ==================================================
+# Display EX-VAT (locked, visible like Excel)
 st.sidebar.markdown("### 🔒 Calculated price")
 st.sidebar.write(f"Selling price EX VAT (€): **{price_ex_vat:.2f}**")
 
 # ==================================================
-# 🟩 OPERATIONS
+# 🟩 OPERATIONS (VARIABLES – GREEN)
 # ==================================================
 st.sidebar.header("🟩 Operations")
 
@@ -119,15 +118,30 @@ product_margin_pct = st.sidebar.number_input(
 )
 
 # ==================================================
-# 🔒 CALCULATIONS (FEUIL 2 STRICT)
+# 🟩 EXTRA TURNOVER (ASSUMPTION – CRITICAL)
 # ==================================================
+extra_turnover_day = st.sidebar.number_input(
+    "Extra turnover generated / day (€) — ASSUMPTION",
+    min_value=0.0,
+    max_value=1000.0,
+    value=64.0,
+    step=1.0
+)
+
+# ==================================================
+# 🔒 CALCULATIONS (STRICT FEUIL 2)
+# ==================================================
+
+# Informational only (Excel reference line)
 converted_sku_per_day = croissants_per_day * (conversion_pct / 100)
 
-extra_turnover_day = sku_sales_per_day * price_ex_vat
+# Extra turnover (EXCEL LOGIC)
 extra_turnover_year = extra_turnover_day * days_per_year
 
+# Extra margin (used for ROI)
 extra_margin_year = extra_turnover_year * (product_margin_pct / 100)
 
+# ROI (months) — BASED ON MARGIN CASHFLOW
 roi_month = (
     total_equipment / (extra_margin_year / 12)
     if extra_margin_year > 0
@@ -151,5 +165,5 @@ st.subheader("Calculated values (locked)")
 
 st.write(f"• Selling price EX VAT: **€{price_ex_vat:.2f}**")
 st.write(f"• Converted SKU product / day: **{converted_sku_per_day:.1f}**")
-st.write(f"• Extra turnover generated / day: **€{extra_turnover_day:,.0f}**")
+st.write(f"• Extra turnover generated / day (assumption): **€{extra_turnover_day:,.0f}**")
 st.write(f"• Extra margin / year (used for ROI): **€{extra_margin_year:,.0f}**")
