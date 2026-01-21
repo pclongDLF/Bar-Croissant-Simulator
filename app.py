@@ -56,15 +56,17 @@ extra_sku_per_day = st.sidebar.number_input(
 cost_per_unit = price_ex_vat * (1 - product_margin_pct / 100)
 
 daily_turnover_core = croissants_per_day * price_ex_vat
-daily_extra_turnover = extra_sku_per_day * price_ex_vat * (additional_pct / 100)
+daily_extra_turnover = daily_turnover_core * (additional_pct / 100)
+annual_extra_turnover = daily_extra_turnover * days_per_year
 
-annual_turnover_core = daily_turnover_core * days_per_year
 annual_extra_turnover = daily_extra_turnover * days_per_year
 
 total_annual_turnover = annual_turnover_core + annual_extra_turnover
 
 # ROI month (as in Excel)
-roi_month = total_equipment / (total_annual_turnover / 12) if total_annual_turnover > 0 else 0
+roi_month = total_equipment / (
+    (annual_turnover_core + annual_extra_turnover) / 12
+)
 
 # ======================
 # 📊 RESULTS (DISPLAY ONLY)
@@ -96,6 +98,7 @@ col_b.metric(
 st.divider()
 
 st.write(f"• Core croissant turnover / year: **€{annual_turnover_core:,.0f}**")
+
 
 
 
